@@ -3,6 +3,7 @@ from django.http import response
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from rest_framework import serializers
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from .serializers import TodoSerializer
 from .models import Todo
@@ -11,6 +12,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from rest_framework import status
+from rest_framework.generics import GenericAPIView, mixins, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import GenericViewSet
 
 # Create your views here.
 
@@ -138,3 +141,55 @@ class TodoDetail(APIView):
         }
         return Response(status=status.HTTP_204_NO_CONTENT)
         # return Response(success)
+
+
+################## GenericAPI View ###############################
+
+
+class TodoListCreate(mixins.ListModelMixin, mixins.CreateModelMixin, GenericAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class TodoRetreiveUpdateDelete(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+################# Concerete Views #########################
+
+class TodoConcListCreate(ListCreateAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+
+class TodoConcRetreiveUpdateDelete(RetrieveUpdateDestroyAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+
+################### GenericViewSets #######################
+
+class TodoListRetreive(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+
+class TodoAll(viewsets.ModelViewSet):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
